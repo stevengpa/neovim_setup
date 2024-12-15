@@ -1,0 +1,91 @@
+#!/bin/bash
+
+NVIM_FOLDER=~/.config/nvim
+LAZY_FOLDER=~/.local/share/nvim/lazy
+
+is_program_installed() {
+  if command -v "$1" >/dev/null 2>&1; then
+    printf "y"
+  else
+    printf "n"
+  fi
+}
+
+folder_exists() {
+  if [ -d "$1" ]; then
+    printf "y"
+  else
+    printf "n"
+  fi
+}
+
+file_exists() {
+  if [ -f "$1" ]; then
+    printf "y"
+  else
+    printf "n"
+  fi
+}
+
+install_neovim() {
+  if [ "$(is_program_installed "nvim")" = "y" ]; then
+    echo "Neovim is installed"
+  else
+    echo "Installing Neovim"
+    apt update && apt-get install -y neovim
+    echo "Neovim was installed"
+  fi
+}
+
+install_ripgrep() {
+  if [ "$(is_program_installed "rg")" = "y" ]; then
+    echo "Ripgrep is installed"
+  else
+    echo "Installing Ripgrep"
+    apt update && apt-get install -y ripgrep
+    echo "Ripgrep was installed"
+  fi
+}
+
+install_nerd_font() {
+  FONT_DIR=~/.local/share/fonts
+  FONT_FILE="$FONT_DIR/MesloLGS NF Regular.ttf"
+
+  if [ "$(file_exists "$FONT_FILE")" = "y" ]; then
+    echo "MesloLGS Nerd Font is installed"
+  else
+    echo "Installing MesloLGS Nerd Font"
+    mkdir -p "$FONT_DIR"
+    wget -q -O "$FONT_DIR/MesloLGS NF Regular.ttf" \
+      "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip"
+    unzip "$FONT_DIR/MesloLGS NF Regular.ttf" -d "$FONT_DIR"
+    fc-cache -fv
+    echo "MesloLGS Nerd Font was installed"
+  fi
+}
+
+create_nvim_directory() {
+  if [ "$(folder_exists "$NVIM_FOLDER")" = "y" ]; then
+    echo "nvim folder exists"
+  else
+    mkdir -p "$NVIM_FOLDER"
+    cp -r ./nvim/ "$NVIM_FOLDER"
+    echo "nvim folder was created"
+  fi
+}
+
+create_lazy_nvim_folder() {
+  if [ "$(folder_exists "$LAZY_FOLDER/lazy.nvim")" = "y" ]; then
+    echo "lazy.nvim folder exists"
+  else
+    mkdir -p "$LAZY_FOLDER"
+    git clone https://github.com/folke/lazy.nvim.git "$LAZY_FOLDER/lazy.nvim"
+    echo "lazy.nvim folder was created"
+  fi
+}
+
+install_neovim
+install_ripgrep
+install_nerd_font
+create_nvim_directory
+create_lazy_nvim_folder
